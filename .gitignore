@@ -38,4 +38,4 @@ build/
 Thumbs.db
 
 # Docker
-.env
+.env.dev

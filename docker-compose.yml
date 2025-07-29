@@ -1,20 +1,106 @@
+version: '3.8'
+
 services:
-  postgres:
+  # ---------------------- #
+  # PostgreSQL - Dev ENV  #
+  # ---------------------- #
+  postgres-dev:
     image: postgres:13
+    container_name: postgres-dev
     environment:
-      POSTGRES_DB: hl7db
+      POSTGRES_DB: hl7db_dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Localhost 5433 → Container 5432
+    networks:
+      - extravars-net
 
-  extravars:
-    build: .
-    depends_on:
-      - postgres
-    ports:
-      - "8080:8080"
+  # ----------------------- #
+  # PostgreSQL - Test ENV   #
+  # ----------------------- #
+  postgres-test:
+    image: postgres:13
+    container_name: postgres-test
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hl7db
+      POSTGRES_DB: hl7db_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    networks:
+      - extravars-net
+
+  # ------------------------ #
+  # PostgreSQL - Prod ENV    #
+  # ------------------------ #
+  postgres-prod:
+    image: postgres:13
+    container_name: postgres-prod
+    environment:
+      POSTGRES_DB: hl7db_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    networks:
+      - extravars-net
+
+  # ---------------------- #
+  # Spring Boot - Dev ENV #
+  # ---------------------- #
+  extravars-dev:
+    build: .
+    container_name: extravars-dev
+    depends_on:
+      - postgres-dev
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-dev:5432/hl7db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - extravars-net
+
+  # ----------------------- #
+  # Spring Boot - Test ENV #
+  # ----------------------- #
+  extravars-test:
+    build: .
+    container_name: extravars-test
+    depends_on:
+      - postgres-test
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-test:5432/hl7db1
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - extravars-net
+
+  # ------------------------ #
+  # Spring Boot - Prod ENV  #
+  # ------------------------ #
+  extravars-prod:
+    build: .
+    container_name: extravars-prod
+    depends_on:
+      - postgres-prod
+    ports:
+      - "8083:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-prod:5432/hl7db2
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - extravars-net
+
+# Shared network for all containers
+networks:
+  extravars-net:
+    driver: bridge

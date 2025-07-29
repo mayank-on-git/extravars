@@ -9,6 +9,10 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        env: [dev, test, prod]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,8 +29,8 @@ jobs:
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/extravars:latest .
+      - name: Build Docker image for ${{ matrix.env }}
+        run: docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/extravars:${{ matrix.env }} .
 
-      - name: Push Docker image
-        run: docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/extravars:latest
+      - name: Push Docker image for ${{ matrix.env }}
+        run: docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/extravars:${{ matrix.env }}

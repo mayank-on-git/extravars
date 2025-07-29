@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: extravars
+  profiles:
+    active: dev    # default profile
+
+---
+# optional: common config for all
+logging:
+  level:
+    root: INFO
